@@ -7,15 +7,24 @@ import java.util.*;
 public class EvilHangmanGame implements IEvilHangmanGame {
     TreeSet<String> words;
     TreeSet<Character> guessedLetters = new TreeSet<Character>();
+    String subSetKey;
 
     @Override
     public void startGame(File dictionary, int wordLength) throws IOException, EmptyDictionaryException {
         words = populateSet(dictionary, wordLength);
+
+        //create initial blank subSetKey
+        StringBuilder stringBuilder = new StringBuilder();
+        for (int i = 0; i < wordLength; ++i)
+        {
+            stringBuilder.append("-");
+        }
+        subSetKey = stringBuilder.toString();
     }
 
     @Override
     public Set<String> makeGuess(char guess) throws GuessAlreadyMadeException {
-        Character myChar = Character.toLowerCase(guess);
+        char myChar = Character.toLowerCase(guess);
         if (guessedLetters.contains(myChar))
         {
             throw new GuessAlreadyMadeException();
@@ -43,6 +52,15 @@ public class EvilHangmanGame implements IEvilHangmanGame {
                 winner = entry.getKey();
             }
         }
+        StringBuilder stringBuilder = new StringBuilder(subSetKey);
+        for (int i = 0; i < winner.length(); ++i)
+        {
+            if (winner.charAt(i) != '-' && winner.charAt(i) != subSetKey.charAt(i))
+            {
+                stringBuilder.setCharAt(i, winner.charAt(i));
+            }
+        }
+        subSetKey = stringBuilder.toString();
         words = partitionMap.get(winner);
         return partitionMap.get(winner);
     }
@@ -74,7 +92,6 @@ public class EvilHangmanGame implements IEvilHangmanGame {
     private String getSubSetKey(String word, char guessedLetter)
     {
         StringBuilder stringBuilder = new StringBuilder();
-
         for (int i = 0; i < word.length(); ++i)
         {
             if (guessedLetter == word.charAt(i))
@@ -83,7 +100,7 @@ public class EvilHangmanGame implements IEvilHangmanGame {
             }
             else
             {
-                stringBuilder.append("_");
+                stringBuilder.append("-");
             }
         }
         return stringBuilder.toString();
